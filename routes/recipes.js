@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+
+require('date-utils');
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : process.env.DATABASE_HOST,
@@ -47,6 +49,8 @@ router.post('/', function(req, res, next) {
   var data = {};
   try {
     request_data = validate(req);
+    request_data[created_at] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
+    request_data[updated_at] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
   } catch (e) {
     console.log(e);
   }
@@ -77,6 +81,7 @@ router.patch('/:id', function(req, res, next) {
   var data = {};
   try {
     request_data = validate(req);
+    request_data[updated_at] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
   } catch (e) {
     console.log(e);
   }
