@@ -92,7 +92,7 @@ router.post('/', function(req, res, next) {
       data = {"message": "Recipe creation failed!",
               "required": "title, making_time, serves, ingredients, cost"
               };
-      res.status(400).send(data);
+      res.status(200).send(data);
     } else {
       var query = 'select title, making_time, serves, ingredients, cost from recipes where id = ?';
       connection.query(query,[insert_results.insertId], function (error, select_results, fields) {
