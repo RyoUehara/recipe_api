@@ -77,7 +77,6 @@ router.get('/:id', function(req, res, next) {
  * 追加を行う
  */
 router.post('/', function(req, res, next) {
-  console.log(req.body);
   var query = 'insert into recipes set ?';
   var request_data = {};
   var data = {};
@@ -85,17 +84,14 @@ router.post('/', function(req, res, next) {
     request_data = validate(req);
     request_data["created_at"] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
     request_data["updated_at"] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
-    console.log(request_data);
   } catch (e) {
     console.log(e);
   }
-  console.log(request_data);
   connection.query(query,request_data, function (error, insert_results, fields) {
     if (error) {
       data = {"message": "Recipe creation failed!",
               "required": "title, making_time, serves, ingredients, cost"
               };
-      console.log(data);
       res.status(400).send(data);
     } else {
       var query = 'select title, making_time, serves, ingredients, cost from recipes where id = ?';
@@ -104,7 +100,6 @@ router.post('/', function(req, res, next) {
         data = {"message": "Recipe successfully created!",
               "recipe": convertALLCostInRecipesToString(select_results)
             };
-        console.log(data);
         res.send(data);
       });
     }
@@ -172,6 +167,9 @@ router.delete('/:id', function(req, res, next) {
  */
 function validate(req) {
   var data = {}
+  if (Object.keys(req.body).length === 0 ){
+    throw new Error("validate failed!");
+  }
   Object.keys(req.body).forEach(function(key) {
     // costが数字でくるため文字列に変換した上で長さを確認、数値以外が来てたらmysqlでエラーになるから問題なし
     if( req.body[key].toString().length > 0 ) {
