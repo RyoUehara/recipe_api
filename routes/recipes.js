@@ -44,6 +44,7 @@ router.get('/:id', function(req, res, next) {
  * 追加を行う
  */
 router.post('/', function(req, res, next) {
+  console.log(req.body);
   var query = 'insert into recipes set ?';
   var request_data = {};
   var data = {};
@@ -76,6 +77,7 @@ router.post('/', function(req, res, next) {
  * 更新を行う
  */
 router.patch('/:id', function(req, res, next) {
+  console.log(req.body);
   var query = 'update recipes set ? where id = ?';
   var request_data = {};
   var data = {};
