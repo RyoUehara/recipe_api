@@ -43,33 +43,6 @@ var get_SQL_Connection = function() {
 }
 get_SQL_Connection();
 
-var connection;
-
-function handleDisconnect() {
-  console.log('INFO.CONNECTION_DB: ');
-  connection = mysql.createConnection(db_config);
-  
-  //connection取得
-  connection.connect(function(err) {
-      if (err) {
-          console.log('ERROR.CONNECTION_DB: ', err);
-          setTimeout(handleDisconnect, 1000);
-      }
-  });
-  
-  //error('PROTOCOL_CONNECTION_LOST')時に再接続
-  connection.on('error', function(err) {
-      console.log('ERROR.DB: ', err);
-      if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-          console.log('ERROR.CONNECTION_LOST: ', err);
-          handleDisconnect();
-      } else {
-          throw err;
-      }
-  });
-}
-
-handleDisconnect();
 
 /* recipes 
  * 全件取得を行う
@@ -112,14 +85,17 @@ router.post('/', function(req, res, next) {
     request_data = validate(req);
     request_data["created_at"] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
     request_data["updated_at"] = new Date().toFormat('YYYY-MM-DD HH:MI:SS');
+    console.log(request_data);
   } catch (e) {
     console.log(e);
   }
+  console.log(request_data);
   connection.query(query,request_data, function (error, insert_results, fields) {
     if (error) {
       data = {"message": "Recipe creation failed!",
               "required": "title, making_time, serves, ingredients, cost"
               };
+      console.log(data);
       res.status(400).send(data);
     } else {
       var query = 'select title, making_time, serves, ingredients, cost from recipes where id = ?';
@@ -128,6 +104,7 @@ router.post('/', function(req, res, next) {
         data = {"message": "Recipe successfully created!",
               "recipe": convertALLCostInRecipesToString(select_results)
             };
+        console.log(data);
         res.send(data);
       });
     }
