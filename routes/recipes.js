@@ -3,13 +3,73 @@ var router = express.Router();
 
 require('date-utils');
 var mysql      = require('mysql');
-var connection = mysql.createConnection({
+var db_config = {
   host     : process.env.DATABASE_HOST,
   user     : process.env.DATABASE_USER,
   password : process.env.DATABASE_PASSWORD,
   database : process.env.DATABASE_NAME
-});
+};
 
+var mysql = require('mysql');
+
+var connection;
+
+var get_SQL_Connection = function() {
+
+  connection = mysql.createConnection(db_config);
+
+  //接続時
+  connection.connect(function(err) {
+    if(err) {
+      console.log("SQL CONNECT ERROR >> " + err);
+      setTimeout(get_SQL_Connection, 2000);  //接続失敗時リトライ
+    } else {
+      console.log("SQL CONNECT SUCCESSFUL.");
+    }
+  });
+
+  //エラーのとき
+  connection.on('error', function(err) {
+    console.log("SQL CONNECTION ERROR >> " + err);
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+      console.log('=> RECONECT...');
+      //再接続
+      get_SQL_Connection();
+    } else {
+      throw err;
+    }
+  });
+
+}
+get_SQL_Connection();
+
+var connection;
+
+function handleDisconnect() {
+  console.log('INFO.CONNECTION_DB: ');
+  connection = mysql.createConnection(db_config);
+  
+  //connection取得
+  connection.connect(function(err) {
+      if (err) {
+          console.log('ERROR.CONNECTION_DB: ', err);
+          setTimeout(handleDisconnect, 1000);
+      }
+  });
+  
+  //error('PROTOCOL_CONNECTION_LOST')時に再接続
+  connection.on('error', function(err) {
+      console.log('ERROR.DB: ', err);
+      if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+          console.log('ERROR.CONNECTION_LOST: ', err);
+          handleDisconnect();
+      } else {
+          throw err;
+      }
+  });
+}
+
+handleDisconnect();
 
 /* recipes 
  * 全件取得を行う
